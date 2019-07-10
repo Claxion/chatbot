@@ -15,6 +15,7 @@ def home() :
 def hello(name) : 
     #name에는 hello 이름 활용가능.
     # <name> == empty string 인 경우는 도저히 해결이 불가능한가? 
+    # https://stackoverflow.com/questions/14032066/can-flask-have-optional-url-parameters
     if name != None :
         return render_template("hello.html", usename=name)
     else : 

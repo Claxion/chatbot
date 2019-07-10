@@ -27,11 +27,8 @@ sessionurl = "http://edu.ssafy.com/edu/main/index.do"
 driver.get(sessionurl)
 
 #xpath = '//*[@id="_mainComunityId"]/div[2]/div[1]/article/a/span' # 알림
-#xpath = '//*[@id="checkOut"]/span'   #퇴실
-xpath = '//*[@id="checkIn"]/span' #입실
-
-#checkoutkey = driver.find_element_by_id("checkOut").click()
-
+xpath = '//*[@id="checkOut"]/span'   #퇴실
+#xpath = '//*[@id="checkIn"]/span' #입실
 
 btn = driver.find_element_by_xpath(xpath)
 # 자바 스크립트가 있을 경우에는 실행 코드를 넣어줘야함.
