@@ -30,7 +30,7 @@ menuInfo = {}
 #     1 : 
 # }
 
-if weekdayNum == 3 : 
+if weekdayNum == 4 : 
     pass
     #img = menugetter.getMenuImage() 
     # 그림 address만 넘기자

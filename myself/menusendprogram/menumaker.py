@@ -6,6 +6,7 @@ try:
 except ImportError:
     import Image
 import pytesseract
+import tabledetect 
 
 def setLabel(image, str, contour):
     (text_width, text_height), baseline = cv2.getTextSize(str, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 1)
@@ -21,7 +22,6 @@ def changeGrayColorAndBlur(address) :
     # https://webnautes.tistory.com/1296
     # https://sosal.kr/1067
     # https://076923.github.io/posts/Python-opencv-9/#top
-    print("이미지 전처리 - 흑백화")
     img_origin = cv2.imread(address+ r"\menu.png", cv2.IMREAD_COLOR)
     img_copy = img_origin.copy() 
     img_gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
@@ -46,22 +46,20 @@ def saveBoxImage(address) :
     img = cv2.imread(address+ r"\menu.png", cv2.IMREAD_GRAYSCALE)
 
     ret,img_binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV|cv2.THRESH_OTSU)
-    cv2.imshow('result', img_binary)
-    cv2.waitKey(0)
+    #cv2.imshow('result', img_binary)
+    #cv2.waitKey(0)
 
     contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     rectlist = []
     for cnt in contours:
         size = len(cnt)
-        print(size)
-
+        
         epsilon = 0.005 * cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, epsilon, True)
 
         size = len(approx)
-        print(size)
-
+        
         cv2.line(img, tuple(approx[0][0]), tuple(approx[size-1][0]), (0, 255, 0), 3)
         for k in range(size-1):
             cv2.line(img, tuple(approx[k][0]), tuple(approx[k+1][0]), (0, 255, 0), 3)
@@ -85,9 +83,6 @@ def saveBoxImage(address) :
         else:
             setLabel(img, str(size), cnt)
 
-    cv2.imshow('result', img)
-    cv2.waitKey(0)
-
     # rentangle 2가지 찾음 -> 2을 각각을 이미지로 저장하자
     count = 0
     for rect in rectlist : 
@@ -101,42 +96,45 @@ def saveBoxImage(address) :
         cv2.imwrite(address+r"/menuBox"+str(count)+".jpg", img[y: y + h, x: x + w])
 
     
-def cutImagesToGetInfo(address) : 
+def cutImagesToGetInfo(address, imagename) : 
     # http://www.gisdeveloper.co.kr/?p=6714
     # 먼저 Box1 : 식단표
     # Box2 : 반시간표
     # 혹시 형태가 바뀐다면 크기에 따라서 바꿔주는 것이 맞을 듯하다. 큰 것이 식단표. 위의 함수에서 저장해줄 때 처리해주면 됨.
+    # 격자감지 https://codeday.me/ko/qa/20190619/823855.html
+    # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
+    # Hough Transform 방법
+    # https://answers.opencv.org/question/63847/how-to-extract-tables-from-an-image/ 테이블 찾아내서 잘라내기 
+    # file:///C:/Users/student/Downloads/opencv-python-tutroals.pdf
+    # https://m.blog.naver.com/samsjang/220505815055
 
-    img = cv2.imread(address+ r"\menuBox1.jpg", cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread(f"{address}\{imagename}.jpg")
+    cv2.imshow("img",img)
+    mask,joint = tabledetect.detectTable(img).run()
+    cv2.waitKey()
+
+    corners = cv2.goodFeaturesToTrack(joint,50,0.1,10)
+    corners = np.int0(corners)
+    # 일단 찾은 x,y = corner.ravel() 를 set에 넣고, 약 차이가 5 미만인 것은 그 중 가장 작은 값으로 통일한다. 같은 라인인데 약간의 오차로 만들어진 놈들임
+    xset = set() 
+    yset = set()
+    xylist = dict() 
+    number = 1
+    for corner in corners :
+        x,y = corner.ravel()
+        xset.add(x)
+        yset.add(y)
+        xylist[number] = { 'x' : x , 'y' : y}
+        cv2.circle(mask, (x,y),5 ,(0,0,255),-1)
+        number += 1
+    
+    print(xylist)
     
 
-    #ret,img_binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV|cv2.THRESH_OTSU)
-    #cv2.imshow('result', img)
-    #cv2.waitKey(0)
+    cv2.imshow("img",mask)
+    cv2.waitKey()
 
-    edges = cv2.Canny(img,50,150,apertureSize = 3)
     
-    lines = cv2.HoughLines(edges,1,np.pi/180,150)
-    for line in lines:
-        rho,theta = line[0]
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a*rho
-        y0 = b*rho
-        x1 = int(x0 + 1000*(-b))
-        y1 = int(y0 + 1000*(a))
-        x2 = int(x0 - 1000*(-b))
-        y2 = int(y0 - 1000*(a))
-    
-        cv2.line(img,(x1,y1),(x2,y2),(255,0,255),1)
-    
-    cv2.imshow('edges', edges)
-    cv2.imshow('result', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-
 
 
 def makeMenuItems(address) : 
@@ -146,51 +144,12 @@ def makeMenuItems(address) :
     
     #날짜를 찾아서
     #필요한 만큼 잘라야 할 것 같다.   
-    cutImagesToGetInfo(address)    
+    #cutImagesToGetInfo(address, "menuBox1")
+    cutImagesToGetInfo(address, "menuBox2")
 
     
 
-    # 격자감지 https://codeday.me/ko/qa/20190619/823855.html
-    # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_houghlines/py_houghlines.html
-
-    # img = cv2.imread(address + '\Img1.jpg')
-    # gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY) 
     
-    # # Apply edge detection method on the image 
-    # edges = cv2.Canny(gray,50,150,apertureSize = 3) 
-    
-    # # This returns an array of r and theta values 
-    # lines = cv2.HoughLines(edges,1,np.pi/180, 200) 
-
-    # # The below for loop runs till r and theta values  
-    # # are in the range of the 2d array 
-    # for r,theta in lines[0]: 
-        
-    #     print(lines[1])
-    #     # Stores the value of cos(theta) in a 
-    #     a = np.cos(theta) 
-    #     # Stores the value of sin(theta) in b 
-    #     b = np.sin(theta) 
-    #     # x0 stores the value rcos(theta) 
-    #     x0 = a*r 
-    #     # y0 stores the value rsin(theta) 
-    #     y0 = b*r 
-    #     # x1 stores the rounded off value of (rcos(theta)-1000sin(theta)) 
-    #     x1 = int(x0 + 1000*(-b))    
-    #     # y1 stores the rounded off value of (rsin(theta)+1000cos(theta)) 
-    #     y1 = int(y0 + 1000*(a)) 
-    #     # x2 stores the rounded off value of (rcos(theta)+1000sin(theta)) 
-    #     x2 = int(x0 - 1000*(-b)) 
-    #     # y2 stores the rounded off value of (rsin(theta)-1000cos(theta)) 
-    #     y2 = int(y0 - 1000*(a)) 
-    #     # cv2.line draws a line in img from the point(x1,y1) to (x2,y2). 
-    #     # (0,0,255) denotes the colour of the line to be  
-    #     #drawn. In this case, it is red.  
-    #     cv2.line(img,(x1,y1), (x2,y2), (0,0,255),2) 
-        
-    # # All the changes made in the input image are finally 
-    # # written on a new image houghlines.jpg 
-    # cv2.imwrite(address + '\houghlines3.jpg',img)
 
     ## pytesseract 사용
 
