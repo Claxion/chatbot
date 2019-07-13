@@ -29,12 +29,23 @@ def getMenuImage() :
     #driver.find_element_by_class_name("form-btn").click()
     driver.find_element_by_css_selector("#wrap > div > div > div.section > form > div > div.field-set.log-in > div.form-btn > a").click()
 
-    #로그인 과정 완료
-    sessionurl = "http://edu.ssafy.com/edu/main/index.do"
+    #로그인 과정 완료 후 공지사항으로 이동.
+    noticeurl = "http://edu.ssafy.com/edu/board/notice/list.dp"
     driver.get(sessionurl)
 
+    # 공지사항에서 <중식시간>이라는 글을 찾아서 가장 번호가 높은 것을 받아내자.
+    res = requests.get(noticeurl).text
+    doc = bs4.BeautifulSoup(res, 'html.parser')
+    notices = doc2.select_one("#wrap > form > div > div.content > div.section > div.board-wrap > table.default-tbl.type2 > tbody")
+    #print(notices.text)
+
+
+
+    # 찾아냈다면 해당되는 페이지를 클릭해 내부 진입 후 그림을 찾아 다운로드한다.
+    
+
     #xpath = '//*[@id="_mainComunityId"]/div[2]/div[1]/article/a/span' # 알림
-    xpath = '//*[@id="checkOut"]/span'   #퇴실
+    #xpath = '//*[@id="checkOut"]/span'   #퇴실
     #xpath = '//*[@id="checkIn"]/span' #입실
 
     btn = driver.find_element_by_xpath(xpath)
@@ -44,5 +55,5 @@ def getMenuImage() :
 
 
 
- 
-
+if __name__ == "__main__" :
+     getMenuImage()
