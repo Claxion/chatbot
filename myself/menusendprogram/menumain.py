@@ -32,12 +32,13 @@ menuInfo = {}
 
 if weekdayNum == 6 : 
     address = r"C:\Users\student\Downloads"
-    img = menugetter.getMenuImage(address) 
+    menugetter.getMenuImage(address)  #img는 그냥 안에서 저장하는 것으로 끝
     # 그림 address만 넘기자
     # Downloads 혹은 다른 위치가 좋음.
     
     #menuInfo = 
-    menumaker.makeMenuItems(address)
+    #menumaker.makeMenuItems(address)
+
 
 # if weekdayNum in range(0,5) : 
 #     pass

@@ -8,13 +8,14 @@ import requests
 import bs4
 from selenium import webdriver
 import urllib
+from decouple import config
 
 def getMenuImage(address) :
     chromedriver_dir = r'C:\Users\student\Downloads\chromedriver_win32\chromedriver.exe'
     driver = webdriver.Chrome(chromedriver_dir)
 
-    inputusername = "" #사용자이름
-    inputuserpwd  = "" #사용자 비밀번호
+    inputusername = config("USERID") #사용자이름
+    inputuserpwd  = config("USERPASSWORD") #사용자 비밀번호
 
     loginurl = "https://edu.ssafy.com/comm/login/SecurityLoginForm.do"
     driver.get(loginurl)
@@ -54,17 +55,17 @@ def getMenuImage(address) :
     
     # launches[0] 가 최신
     # 찾아냈다면 해당되는 페이지를 클릭해 내부 진입 후 그림을 찾아 다운로드한다.
-    print(launches[0])
-    print(launches[0]['a'])
-    
-    launchgoal = driver.find_element_by_css_selector("#wrap > form > div > div.content > div.section > div.board-wrap > table.default-tbl.type2 > tbody > tr:nth-child(1) > td.link > a").click()
+    target = launches[0].a['onclick'] # onclick attribute에 해당되는 값을 받는다.
+    # target : fnDetail('2588'); 함수
+    driver.execute_script(target)
+
     html = driver.page_source
     doc = bs4.BeautifulSoup(html,'html.parser')
     #tr:nth-child of 와 같은 식으로 사용할 수 없다. nth-of-type처럼 사용해야 beautiful soup에서 인식가능
     imagebox =  doc.select_one("#wrap > form > div > div.content > div > div:nth-of-type(1) > div.datail-content.mb20 > p > img")
     imageurl = imagebox['src']
     
-    #res = urllib.request.urlretrieve("https:" + imageurl, address +"\menu.png")
+    res = urllib.request.urlretrieve("https:" + imageurl, address +"\menu.png")
 
 if __name__ == "__main__" :
      address = r"C:\Users\student\Downloads"
