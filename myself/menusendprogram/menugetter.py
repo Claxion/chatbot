@@ -10,7 +10,7 @@ from selenium import webdriver
 import urllib
 
 def getMenuImage(address) :
-    chromedriver_dir = r'C:\Users\Jin\Downloads\chromedriver_win32\chromedriver.exe'
+    chromedriver_dir = r'C:\Users\student\Downloads\chromedriver_win32\chromedriver.exe'
     driver = webdriver.Chrome(chromedriver_dir)
 
     inputusername = "" #사용자이름
@@ -40,12 +40,13 @@ def getMenuImage(address) :
     doc = bs4.BeautifulSoup(html, 'html.parser')
     # 공지사항 아래의 것들을 가져온다
     # 어떻게 찾은 위치로 들어가게 할 수 있지 ?.
-    position = "#wrap > form > div > div.content > div.section > div.board-wrap > table.default-tbl.type2 > tbody" # > tbody > tr" : 여기까지 쓰면 셀레니움이 꺼져버림...???
+    # # > tbody > tr" : 여기까지 쓰면 셀레니움이 꺼져버림...??? 단순 크래시의 문제는 버전 문제일수도???
+    position = "#wrap > form > div > div.content > div.section > div.board-wrap > table.default-tbl.type2 > tbody" 
     noticebox = doc.select_one(position)
-    print(noticebox)
+    #print(noticebox)
     notices = noticebox.find_all("tr")
-    print(notices)
-    #notices = doc.select("td > span")
+    #print(notices)
+
     launches = []
     for notice in notices :
          if "중식" in notice.text :
@@ -53,6 +54,8 @@ def getMenuImage(address) :
     
     # launches[0] 가 최신
     # 찾아냈다면 해당되는 페이지를 클릭해 내부 진입 후 그림을 찾아 다운로드한다.
+    print(launches[0])
+    print(launches[0]['a'])
     
     launchgoal = driver.find_element_by_css_selector("#wrap > form > div > div.content > div.section > div.board-wrap > table.default-tbl.type2 > tbody > tr:nth-child(1) > td.link > a").click()
     html = driver.page_source
@@ -61,8 +64,8 @@ def getMenuImage(address) :
     imagebox =  doc.select_one("#wrap > form > div > div.content > div > div:nth-of-type(1) > div.datail-content.mb20 > p > img")
     imageurl = imagebox['src']
     
-    res = urllib.request.urlretrieve("https:" + imageurl, address +"\menu.png")
+    #res = urllib.request.urlretrieve("https:" + imageurl, address +"\menu.png")
 
 if __name__ == "__main__" :
-     address = r"C:\Users\Jin\Downloads"
+     address = r"C:\Users\student\Downloads"
      getMenuImage(address)
