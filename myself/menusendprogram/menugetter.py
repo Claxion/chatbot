@@ -10,6 +10,7 @@ from selenium import webdriver
 import urllib
 from decouple import config
 
+
 def getMenuImage(address) :
     chromedriver_dir = r'C:\Users\student\Downloads\chromedriver_win32\chromedriver.exe'
     driver = webdriver.Chrome(chromedriver_dir)
