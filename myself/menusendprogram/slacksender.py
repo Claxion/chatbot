@@ -3,6 +3,7 @@ import requests
 import os
 import slack
 from decouple import config
+import datetime
 
 # using slack 
 # https://slack.dev/python-slackclient/basic_usage.html#sending-a-message
@@ -19,8 +20,8 @@ def sendMenuByDay(theDay):
 
 def slackrun() :
     # Bot User OAuth Access Token 을 사용한다.
-    #slack_token = config("TESTMENUSLACKTOKEN") # test
-    slack_token = config("SSAFYMENUSLACKTOKEN") # ssafy
+    slack_token = config("TESTMENUSLACKTOKEN") # test
+    #slack_token = config("SSAFYMENUSLACKTOKEN") # ssafy
     
     client = slack.WebClient(token = slack_token)
     #client.chat_postMessage(
@@ -68,4 +69,4 @@ def slackrun() :
 )
 
 if __name__ == '__main__' :
-    slackrun()
+    #slackrun()
