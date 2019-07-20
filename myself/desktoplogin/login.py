@@ -8,7 +8,9 @@
 
 from tkinter import *
 from selenium import webdriver
-import os, sys, time
+import os
+from datetime import datetime
+
 
 import edussafylogin
 
@@ -44,12 +46,26 @@ def logout():
 #     Label(register_screen, text="Registration Success", fg="green", font=("calibri", 11)).pack()
 
 # Designing Main(first) window
+def checktime_screen():
+    global checktime_screen
+    checktime_screen = Toplevel(main_screen)
+    checktime_screen.title('퇴실시간체크')
+    checktime_screen.geometry('200x100')
+    Label(checktime_screen, text = '6시 전입니다.\n 진짜 퇴실하시겠습니까?').pack()
+    Button(checktime_screen, text='yes',width=10, height = 1, command='').pack()
+    Button(checktime_screen, text='no',width=10, height = 1, command='').pack()
+    checktime_screen.lift()
 
 def main_account_screen():
-    loginfile = open(homepath+'\\username.txt','r')
-    
     global main_screen
     main_screen = Tk()
+    filepath = homepath+'\\username.txt'
+    if os.path.isfile(filepath):
+        loginfile = open(filepath,'r')
+        
+    else:
+        loginfile = open(filepath,'w')
+    
     global username
     global password
     username = StringVar()
@@ -70,15 +86,18 @@ def main_account_screen():
     Label(text="").pack()
     Button(text="퇴실", height="2", width="30", command= logout).pack()
     
-    
+    if datetime.now().hour <= 24:
+        checktime_screen()
+    else :
+        pass
+    main_screen.iconify()
     main_screen.mainloop()
 
-if __name__ == '__main__':
-    if  getattr(sys, 'frozen', False): 
-        chromedriver_path = os.path.join(sys._MEIPASS, "chromedriver.exe")
-        driver = webdriver.Chrome(r'C:\Users\student\python\myself\desktoplogin\chromedriver.exe')
-    else:
-        driver = webdriver.Chrome()
 
-    homepath = os.path.expanduser('~')
-    main_account_screen()
+
+homepath = os.path.expanduser('~')
+
+
+main_account_screen()
+
+#%%
